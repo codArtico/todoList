@@ -1,13 +1,12 @@
 import tkinter as tk
-from taskManager import *
-from todoGUI import*
-
+from todoGUI import *
+from taskManager import TaskManager 
 
 class Main:
     def __init__(self):
         self.telaPrincipal = tk.Tk()
-        self.taskManager = TaskManager()
-        self.todoGUI = todoGUI(self.telaPrincipal,self.taskManager)
+        self.taskManager = TaskManager()  # Criando uma instância do TaskManager
+        self.todoGUI = TodoGUI(self.telaPrincipal, self.taskManager)  # Passando a instância para todoGUI
 
     def run(self):
         self.telaPrincipal.mainloop()
@@ -15,4 +14,3 @@ class Main:
 if __name__ == "__main__":
     main = Main()
     main.run()
-        

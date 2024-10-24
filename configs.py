@@ -1,0 +1,3 @@
+CORES = {
+    'bg' : '#ffffff',
+}
