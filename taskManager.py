@@ -6,11 +6,21 @@ class TaskManager:
         self.db_manager.connect()
 
     def addTask(self, description):
-        query = "INSERT INTO tasks (description) VALUES (%s)"
+        # Consulta o último ID na tabela de tarefas
+        query = "SELECT MAX(id) FROM tasks"
         cursor = self.db_manager.connection.cursor()
-        cursor.execute(query, (description,))
+        cursor.execute(query)
+        last_id = cursor.fetchone()[0]
+        
+        # Se não houver tarefas, inicia o ID em 1
+        new_id = (last_id + 1) if last_id is not None else 1
+
+        # Insere a nova tarefa com o novo ID
+        insert_query = "INSERT INTO tasks (id, description) VALUES (%s, %s)"
+        cursor.execute(insert_query, (new_id, description))
         self.db_manager.connection.commit()
         cursor.close()
+
 
     def concluirTask(self, task_id, completed):
         try:
@@ -23,14 +33,13 @@ class TaskManager:
         finally:
             cursor.close()
 
-
-
     def deleteTask(self, task_id):
         query = "DELETE FROM tasks WHERE id = %s"
         cursor = self.db_manager.connection.cursor()
         cursor.execute(query, (task_id,))
         self.db_manager.connection.commit()
         cursor.close()
+        self.atualizarIDs()
 
     def getTasks(self):
         query = "SELECT * FROM tasks"
@@ -39,3 +48,16 @@ class TaskManager:
         tasks = cursor.fetchall()
         cursor.close()
         return tasks
+    
+    def atualizarIDs(self):
+        # Atualiza os IDs das tarefas restantes
+        cursor = self.db_manager.connection.cursor()
+
+        # Inicializa a variável
+        cursor.execute("SET @count = 0;")
+        
+        # Atualiza os IDs
+        cursor.execute("UPDATE tasks SET id = (@count := @count + 1);")
+
+        self.db_manager.connection.commit()
+        cursor.close()
